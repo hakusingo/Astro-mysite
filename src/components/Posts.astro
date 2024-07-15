@@ -1,0 +1,55 @@
+---
+import { useState, useEffect } from 'react';
+
+async function fetchPosts() {
+  const res = await fetch('https://wp-data.hakusingo.com/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query: `
+        {
+          posts {
+            edges {
+              node {
+                id
+                title
+                date
+              }
+            }
+          }
+        }
+      `,
+    }),
+  });
+
+  const { data } = await res.json();
+  return data.posts.edges.map((edge) => edge.node);
+}
+---
+
+<script>
+  import { useState, useEffect } from 'react';
+
+  const Posts = () => {
+    const [posts, setPosts] = useState([]);
+
+    useEffect(() => {
+      fetchPosts().then((data) => setPosts(data));
+    }, []);
+
+    return (
+      <ul>
+        {posts.map((post) => (
+          <li key={post.id}>
+            <h2>{post.title}</h2>
+            <p>{post.date}</p>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
+  export default Posts;
+</script>
+
+<Posts />
